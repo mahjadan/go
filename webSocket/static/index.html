@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>webSocket example</title>
+
+</head>
+<body>
+<label for="topic">Topic</label>
+<input type="text" id="topic">
+<button id="subscribe">Subscribe</button>
+<label for="message">Message</label>
+<input type="text" id="message"/>
+<button id="send">Send</button>
+<textarea rows="10" cols="50" id="log"></textarea>
+
+
+</body>
+<script>
+    var ws = new WebSocket("ws://localhost:8080/ws")
+    const sendBtn = document.getElementById("send")
+    const subscribeBtn = document.getElementById('subscribe')
+    const topicValue = document.getElementById('topic')
+    const messageValue = document.getElementById('message')
+    const logText = document.getElementById('log')
+
+    sendBtn.addEventListener("click",function(){
+        var v =`{"action":"publish", "topic":"${topicValue.value}", "message":"${messageValue.value}"}`
+        console.log(v)
+        ws.send(v)
+    })
+
+    subscribeBtn.addEventListener("click",function(){
+        var v =`{"action":"subscribe", "topic":"${topicValue.value}", "message":"${messageValue.value}"}`
+        console.log(v)
+        ws.send(v)
+    })
+
+    ws.onopen= () => {
+        const msg=" connected to server...."
+        console.log(msg)
+        logText.value +=  '\r\n' + msg
+    }
+
+    ws.onmessage= data => {
+        console.log("got from server: " + data.data)
+        logText.value +=  '\r\n' +data.data
+    }
+
+    ws.onclose = () =>{
+        console.log("connection closed..")
+    }
+
+</script>
+</html>
