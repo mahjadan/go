@@ -1,0 +1,16 @@
+    <body>
+{{/*    if you use action="/oauth2/login"  it will reset the headers and you will lose the referer header*/}}
+{{/*        <form method="POST" action="/oauth2/login">*/}}
+        <form method="POST" >
+            {{if .ErrMsg}}
+                <div>{{.ErrMsg}}</div>
+            {{end}}
+            <label>Username:</label><br/>
+            <input type="text" name="username">
+            <br/>
+            <label>Password:</label><br/>
+            <input type="password" name="password" >
+            <br/>
+            <button type="submit">Login</button>
+        </form>
+    </body>
