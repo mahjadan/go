@@ -1,0 +1,9 @@
+// create client
+
+curl --location --request POST 'localhost:3000/clients' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "name":"mahmoud jadan",
+    "birthdate":"1983-01-08",
+    "cpf":"7030000000"
+}'
