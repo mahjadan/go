@@ -15,12 +15,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var client *mongo.Client
-var client2 *mongo.Client
-
-// var resource *dockertest.Resource
-// var resource2 *dockertest.Resource
-var pool *dockertest.Pool
+var (
+	client       *mongo.Client
+	pool         *dockertest.Pool
+	wiremockPort string
+)
 
 func TestMain(m *testing.M) {
 	var err error
@@ -29,17 +28,16 @@ func TestMain(m *testing.M) {
 		log.Fatalf("Could not connect to docker: %s", err)
 	}
 	resource, err := getClient(pool, "3.6")
-	resource2, err := getWiremock(pool, "wiremock")
-	fmt.Println("got : ", resource, client, err)
-	fmt.Println("got2 : ", resource2, client2, err)
+	resource2, err := getWiremock(pool, "latest")
+
 	code := m.Run()
 
-	purgeResouce(resource, resource2)
-
+	purgeResource(resource, resource2)
+	//_,_=resource, resource2
 	os.Exit(code)
 }
 
-func TestHome(t *testing.T) {
+func TestMongoContainer(t *testing.T) {
 	e := client.Ping(context.TODO(), nil)
 	fmt.Println("after ping client: ", e)
 	dbs, err := client.ListDatabaseNames(context.TODO(), bson.M{})
@@ -49,15 +47,17 @@ func TestHome(t *testing.T) {
 	t.Logf("1 - databsenames : %v ", dbs)
 }
 
-// func TestHome2(t *testing.T) {
-// 	e := client2.Ping(context.TODO(), nil)
-// 	fmt.Println("after ping client2 : ", e)
-// 	dbs, err := client2.ListDatabaseNames(context.TODO(), bson.M{})
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// 	t.Logf("2 - databsenames : %v ", dbs)
-// }
+func TestWiremockContainer(t *testing.T) {
+	url := "http://localhost:" + wiremockPort + "/__admin"
+	fmt.Println("calling wiremock on : ", url)
+	resp, err := http.Get(url)
+	if err != nil {
+		fmt.Println("calling wiremock err : ", err)
+		t.Error(err)
+	}
+	bytes, _ := ioutil.ReadAll(resp.Body)
+	t.Logf("2 - wiremock resp : %s \n", bytes)
+}
 
 func getClient(pool *dockertest.Pool, mongoVersion string) (*dockertest.Resource, error) {
 
@@ -68,7 +68,7 @@ func getClient(pool *dockertest.Pool, mongoVersion string) (*dockertest.Resource
 		return nil, err
 	}
 
-	fmt.Println(mongoVersion+" - connecting to : ", r.GetPort("27017/tcp"))
+	fmt.Printf("mongo-%s - connecting to : %s \n", mongoVersion, r.GetPort("27017/tcp"))
 	// exponential backoff-retry, because the application in the container might not be ready to accept connections yet
 	if err := pool.Retry(func() error {
 		var err error
@@ -89,28 +89,36 @@ func getClient(pool *dockertest.Pool, mongoVersion string) (*dockertest.Resource
 	return r, nil
 }
 
-func getWiremock(pool *dockertest.Pool, mongoVersion string) (*dockertest.Resource, error) {
+func getWiremock(pool *dockertest.Pool, tag string) (*dockertest.Resource, error) {
 
 	// pulls an image, creates a container based on it and runs it
-	r, err := pool.Run("rodolpheche/wiremock", "2.27.2", nil)
+	r, err := pool.RunWithOptions(&dockertest.RunOptions{
+		Repository: "rodolpheche/wiremock",
+		Tag:        tag,
+		Mounts: []string{
+			//mounting /tmp/tx local machine to /home/wiremock in container
+			"/tmp/tx:/home/wiremock",
+		},
+	})
 	if err != nil {
 		log.Fatalf("Could not start resource: %s", err)
 		return nil, err
 	}
 
-	fmt.Println(mongoVersion+" - connecting to : ", r.GetPort("8443/tcp"))
+	wiremockPort = r.GetPort("8080/tcp")
+	fmt.Println("wiremock - connecting to : ", wiremockPort)
 	// exponential backoff-retry, because the application in the container might not be ready to accept connections yet
 	if err := pool.Retry(func() error {
 
-		resp, err := http.Get("http://localhost:" + r.GetPort("8443/tcp") + "/__admin")
+		resp, err := http.Get("http://localhost:" + wiremockPort + "/__admin")
 		if err != nil {
-			fmt.Printf("trying to connect on localhost:%s, got : %v \n", r.GetPort("8443/tcp"), err)
+			fmt.Printf("trying to connect on localhost:%s, got : %v \n", wiremockPort, err)
 			return err
 		}
 
 		fmt.Println("status: ", resp.StatusCode)
 		rs, _ := ioutil.ReadAll(resp.Body)
-		fmt.Printf("RESPONSE: %v", rs)
+		fmt.Printf("RESPONSE: %s", rs)
 		return nil
 	}); err != nil {
 		log.Fatalf("Could not connect to docker: %s", err)
@@ -118,15 +126,13 @@ func getWiremock(pool *dockertest.Pool, mongoVersion string) (*dockertest.Resour
 
 	return r, nil
 }
-func purgeResouce(reouseces ...*dockertest.Resource) {
+func purgeResource(resources ...*dockertest.Resource) {
 
 	fmt.Println("removing resources.")
-	for _, resource := range reouseces {
-
+	for _, resource := range resources {
 		// You can't defer this because os.Exit doesn't care for defer
 		if err := pool.Purge(resource); err != nil {
 			log.Fatalf("Could not purge resource: %s", err)
 		}
-
 	}
 }
