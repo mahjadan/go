@@ -3,6 +3,8 @@ package main
 import (
 	"crypto/aes"
 	"crypto/cipher"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 )
@@ -15,6 +17,24 @@ func main() {
 		fmt.Printf("error while reading file : %v\n", err)
 	}
 	println("size of bytes from file: ", len(cipherBytes))
+	println("string saved: ", string(cipherBytes))
+	msg := struct {
+		Message string
+	}{}
+	err = json.Unmarshal(cipherBytes, &msg)
+	if err != nil {
+		fmt.Printf("error marshalling: %v\n", err)
+	}
+	fmt.Println("msg received : ", msg)
+
+	decodedBytes, err := base64.StdEncoding.DecodeString(msg.Message)
+	if err != nil {
+		fmt.Printf("Error decoding bytes: %v\n", err)
+	}
+	fmt.Printf("decoded bytes : %v \n", decodedBytes)
+	fmt.Printf("source bytes got : %v\n", cipherBytes)
+
+	cipherBytes = decodedBytes
 
 	key := []byte(KeyText)
 	c, err := aes.NewCipher(key)

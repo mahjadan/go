@@ -4,6 +4,8 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -44,8 +46,21 @@ func main() {
 	// slice. The nonce must be NonceSize() bytes long and unique for all
 	// time, for a given key.
 	bytes := gcm.Seal(nonce, nonce, text, nil)
-	fmt.Println(bytes)
-	err = ioutil.WriteFile("crypto/encrypted-message.data", bytes, 0777)
+	fmt.Println("Bytes:", bytes)
+	encodedString := base64.StdEncoding.EncodeToString(bytes)
+	msg := struct {
+		Message string
+	}{
+		Message: encodedString,
+	}
+	fmt.Printf("encoded string: %v\n", encodedString)
+	marshalledBytes, err := json.Marshal(&msg)
+	if err != nil {
+		fmt.Printf("error marshalling error: %v", err)
+	}
+	fmt.Println("msg: ", msg)
+	//fmt.Println("string: ", encodedString)
+	err = ioutil.WriteFile("crypto/encrypted-message.data", marshalledBytes, 0777)
 	if err != nil {
 		fmt.Printf("error writing to file : %v\n", err)
 	}
