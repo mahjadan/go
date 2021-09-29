@@ -25,7 +25,7 @@ func NewRepository(uri string) *repository {
 
 func (r *repository) OnNotify(event notify.MongoEvent) {
 	if event.Error != nil {
-		panic(event.Error)
+		log.Fatalf("error onNotify: %v", event.Error)
 	}
 	err := r.ReplaceClient(event.Data)
 	if err != nil {
@@ -51,11 +51,11 @@ func getClient(data map[string]interface{}, uri string) (*mongo.Client, error) {
 
 	client, err := mongo.NewClient(clientOptions)
 	if err != nil {
-		panic(err)
+		log.Fatalf("error creating mongodb client: %v", err)
 	}
 	err = client.Connect(ctx)
 	if err != nil {
-		panic(err)
+		log.Fatalf("error connecting to mongodb: %v", err)
 	}
 	err = client.Ping(ctx, nil)
 	if err != nil {
