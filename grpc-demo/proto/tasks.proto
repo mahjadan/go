@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package list;
+
+option go_package = "github.com/mahjadan/go/grpc-demo/pkg/grpc";
+
+service Tasks{
+  rpc List(Void) returns (TaskList) {};
+  rpc Add(NewTask) returns(Task){};
+}
+message Void{}
+
+message Task{
+  string name = 1;
+  bool done = 2;
+}
+
+message TaskList{
+  repeated Task tasks = 1;
+}
+message NewTask{
+  string name=1;
+}
