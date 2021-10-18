@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package grpc;
+option go_package = "github.com/mahjadan/go/grpc-demo/pkg/grpc";
+
+service CpfValidator {
+  rpc Validate(CpfRequest) returns (CpfResponse) {};
+}
+
+message CpfRequest{
+  string cpf = 1;
+  repeated Constraint validations = 2;
+}
+message CpfResponse{
+  repeated ConstraintResponse validations = 1;
+}
+
+message Constraint{
+  string name = 1;
+  string value = 2;
+}
+
+
+message ConstraintResponse{
+  string name = 1;
+  string value = 2;
+  bool result = 3;
+}
