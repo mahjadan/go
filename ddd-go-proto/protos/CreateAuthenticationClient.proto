@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+import "google/rpc/status.proto";
+
+package poc.model;
+
+option go_package = "go-proto/pb";
+//option ruby_package = "POC::Model";
+
+message CreateAuthenticationClient {
+  AuthenticationClientType authentication_client_type = 1 [json_name = "authentication_client_type"];
+  string client_id = 2 [json_name = "client_id"];
+  int64 platform_account_id = 3 [json_name = "platform_account_id"];
+  string client_secret = 4 [json_name = "client_secret"];
+  string  application_uuid = 5 [json_name = "application_uuid"];
+  bool enabled = 6 [json_name = "enabled"];
+  int64 user_id = 7 [json_name = "user_id"];
+  string api_key = 8 [json_name = "api_key"];
+  string api_key_name = 9 [json_name = "api_key_name"];
+}
+
+message AuthenticationClient {
+  AuthenticationClientType authentication_client_type = 1 [json_name = "authentication_client_type"];
+  string client_id = 2 [json_name = "client_id"];
+  int64 platform_account_id = 3 [json_name = "platform_account_id"];
+  string client_secret = 4 [json_name = "client_secret"];
+  string  application_uuid = 5 [json_name = "application_uuid"];
+  bool enabled = 6 [json_name = "enabled"];
+  int64 user_id = 7 [json_name = "user_id"];
+  string api_key = 8 [json_name = "api_key"];
+  string api_key_name = 9 [json_name = "api_key_name"];
+  google.protobuf.Timestamp created_at = 10 [json_name = "created_at"];
+  google.protobuf.Timestamp updated_at = 11 [json_name = "updated_at"];
+}
+
+message CreateAuthenticationClientResponse {
+    AuthenticationClient auth_client = 1 [json_name = "auth_client"];
+    google.rpc.Status status = 2 [json_name="status"];
+}
+
+
+enum AuthenticationClientType {
+  AUTHENTICATION_CLIENT_TYPE_UNSPECIFIED = 0;
+  JWT = 1;
+  PUBLIC_TOKEN = 2;
+  PRIVATE_TOKEN = 3;
+  API_KEY = 4;
+}

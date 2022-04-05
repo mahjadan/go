@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package poc.model;
+
+option go_package = "go-proto/pb";
+
+message RpcError{
+    string error_code = 1 [json_name = "error_code"];
+    string message = 2  [json_name = "message"];
+    repeated ValidationError validation_errors = 3 [json_name = "validation_errors"];
+}
+
+message ValidationError{
+    string field = 1 [json_name = "field"];
+    string restriction = 2 [json_name = "restriction"];
+    string message = 3 [json_name = "message"];
+}

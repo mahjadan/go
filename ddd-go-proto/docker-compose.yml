@@ -1,0 +1,24 @@
+version: '3'
+services:
+  go-proto-poc:
+    build:
+      context: .
+    volumes:
+      - .:/go-proto-poc
+    environment:
+      - FIRESTORE_EMULATOR_HOST=firestore:8081
+      - CLOUD_PROJECT_ID=go-proto-poc
+    depends_on:
+      - firestore
+    ports:
+      - 8888:8888
+
+  firestore:
+    build: ./firestore-emulator
+    ports:
+      - 4500:4500
+      - 8081:8081
+      - 4000:4000
+      - 9099:9099
+    volumes:
+      - ~/.cache/firebase/emulators/:/root/.cache/firebase/emulators/

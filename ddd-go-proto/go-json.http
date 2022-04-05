@@ -1,0 +1,62 @@
+###
+
+# curl http://localhost:8080/health
+GET http://localhost:8080/health
+
+###
+
+# curl -X POST http://localhost:8080/authentication_clients --data-raw '{}'
+POST http://localhost:8080/authentication_clients
+Content-Type: application/x-www-form-urlencoded
+
+{}
+
+###
+
+# curl -X POST http://localhost:8080/authentication_clients --data-raw '{
+#   "authentication_client_type":"JWT",
+#   "client_id":"111111",
+#   "platform_account_id":2222222,
+#   "client_secret":"YYYYYYYYYYYYYY",
+#   "application_uuid":"XXXXXXXXXXXX",
+#   "enabled":true,
+#   "user_id":11111112222,
+#   "api_key":"xxxxx_yyyyyyy_xxxxxx",
+#   "api_key_name":"my first api key"
+#}'
+POST http://localhost:8080/authentication_clients
+Content-Type: application/json
+
+{
+  "client_id": "123456789012390123456xxxxxx",
+  "application_uuid": "123456789012345678901234567890123456",
+  "authentication_client_type": "PUBLIC_TOKEN",
+
+  "user_id": 112233,
+  "client_secret": "xxxxx_yyyyyyy_xxxxxx",
+  "api_key_name": "my-api",
+  "api_key": "123456789012345678901234567890123456"
+}
+
+###
+
+
+
+# protobuf
+
+POST http://localhost:8081/authentication_clients
+Content-Type: application/protobuf
+
+{
+   "authentication_client_type":"JWT",
+   "client_id":"111111",
+   "platform_account_id":2222222,
+   "client_secret":"YYYYYYYYYYYYYY",
+   "application_uuid":"XXXXXXXXXXXX",
+   "enabled":true,
+   "user_id":11111112222,
+   "api_key":"xxxxx_yyyyyyy_xxxxxx",
+   "api_key_name":"my first api key"
+}
+
+###
